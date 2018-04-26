@@ -66,7 +66,7 @@ public class MessagesAction extends HttpServlet {
 		UserInfo user=UserInfo.getInstance();
 		session.setMaxInactiveInterval(600);//设置Session的过期时间为10分钟
 		Vector<String> vector=user.getList();//获取用户列表
-		boolean flag=true;//标记是否登录
+		boolean flag=true;//标记是否登录成功
 		//判断用户是否登录
 		if(vector!=null&&vector.size()>0) {
 			if(vector.contains(username)) {

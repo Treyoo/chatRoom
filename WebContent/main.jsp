@@ -1,10 +1,35 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8"
-    pageEncoding="UTF-8"%>
+    pageEncoding="UTF-8" import="java.sql.*"%>
 <!DOCTYPE html>
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <title>聊天室主界面</title>
+<!-- 导入用于进行Ajax重构的js文件 -->
+<script type="text/javascript" src="JS/AjaxRequest.js"></script>
+<script type="text/javascript">
+/**实例化Ajax对象，实时获取并显示在线人员列表*/
+function showOnline(){
+	var loader=new net.AjaxRequest("online.jsp?nocache="
+			+new Date().getTime(),deal_online,onerror,"GET");
+}
+/**处理一步请求结果函数。将在线人员显示到online单元格*/
+function deal_online() {
+	online.innerHTML=this.req.responseText;
+}
+/**异步请求出错处理函数*/
+function onerror() {
+	alert("很抱歉，服务器出现错误，当前窗口将关闭！");
+	//opener属性是一个可读可写的属性，可返回对创建该窗口的 Window 对象的引用
+	window.opener=null;
+	window.close();
+}
+
+//当页面载入后执行的操作
+window.onload=function(){
+	showOnline();//显示在线用户
+}
+</script>
 </head>
 <body>
 你好！${username}。
@@ -99,7 +124,7 @@
        <td width="21" height="30" align="left">&nbsp;</td>
        <td width="575" align="left">
          <input name="content1" type="text" size="70" onKeyDown=
-         "if(event.keyCode==13&&event.ctrlKey){send();})">
+         "if(event.keyCode==13&&event.ctrlKey){send();}">
          <input name="Submit2" type="button" class="btn_blank" value="发送" 
          onClick="send()">
        </td>
@@ -113,6 +138,7 @@
        All CopyRights&copy;reserved Cui
        </td>
      </tr>
+     
    </table>
  </form>
 </body>
