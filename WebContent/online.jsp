@@ -17,7 +17,8 @@ int amount=0;
   </tr>
   <tr>
     <td height="23" align="center">
-      <a href="#" onclick="set('所有人')">所有人</a><!-- 作用？ -->
+      <!-- 设置成链接是为了实现选择聊天对象功能 -->
+      <a href="#" onclick="set('所有人')">所有人</a>
     </td>
   </tr>
   <%

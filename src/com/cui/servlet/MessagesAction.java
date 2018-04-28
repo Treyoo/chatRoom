@@ -4,8 +4,11 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Iterator;
+import java.util.Random;
 import java.util.Vector;
 
 import javax.servlet.ServletException;
@@ -46,9 +49,9 @@ public class MessagesAction extends HttpServlet {
 		//根据request中的action参数执行相应的方法
 		String action=request.getParameter("action");
 		if(action.equals("getMessages")) {//读取聊天信息
-//			this.getMessages(request, response);
+			this.getMessages(request, response);
 		}else if(action.equals("sendMessage")) {//发送聊天信息
-//			this.sendMessage();
+			this.sendMessage(request,response);
 		}else if(action.equals("loginRoom")) {//登录
 			this.loginRoom(request,response);
 		}else if(action.equals("exitRoom")) {//退出
@@ -154,6 +157,120 @@ public class MessagesAction extends HttpServlet {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
+		}
+	}
+	
+	/**
+	 * 将用户发送的聊天消息保存到xml文件
+	 */
+	public void sendMessage(HttpServletRequest request, HttpServletResponse response) {
+		response.setContentType("text/html;charset=UTF-8");
+		Random random=new Random();
+		/**获取发送的内容***/
+		String from=request.getParameter("from");
+		String face=request.getParameter("face");
+		String to=request.getParameter("to");
+		String color=request.getParameter("color");
+		String content=request.getParameter("content");
+		String isPrivate=request.getParameter("isPrivate");
+		String sendTime=new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date());
+		/************************开始添加聊天信息到xml文件*********************/
+		String newTime=new SimpleDateFormat("yyyyMMdd").format(new Date());//保存文件的年月日
+		String fileURL=request.getSession().getServletContext().getRealPath("xml/"+newTime+".xml");
+		createFile(fileURL);
+		try {
+			SAXReader reader=new SAXReader();
+			Document feedDoc=reader.read(new File(fileURL));
+			Element root=feedDoc.getRootElement();
+			Element messages=root.element("messages");
+			//添加一个<message>子结点
+			Element message=messages.addElement("message");
+			//将聊天信息分别保存到<message>结点下对应的子结点里
+			message.addElement("from").setText(from);
+			message.addElement("face").setText(face);
+			message.addElement("to").setText(to);
+			message.addElement("content").addCDATA("<font color='"+color+"'>"+content+"</font>");
+			message.addElement("isPrivate").setText(isPrivate);
+			message.addElement("sendTime").setText(sendTime);
+			//创建OutputFormat对象
+			OutputFormat format=OutputFormat.createPrettyPrint();//输出格式美化
+			//将请求转发到本类的getMessages()方法
+			request.getRequestDispatcher("MessagesAction?action=getMessages&nocache="
+			+random.nextInt(10000)).forward(request, response);
+			//获取XML文件输出流
+			XMLWriter writer=new XMLWriter(new FileOutputStream(fileURL),format);
+			writer.write(feedDoc);//向流写入数据
+			writer.flush();
+			writer.close();
+			/**********************添加结束******************************/
+		} catch (DocumentException | ServletException | IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+
+	/**
+	 * 从xml文件读取聊天信息
+	 * @param request
+	 * @param response
+	 */
+	public void getMessages(HttpServletRequest request, HttpServletResponse response) {
+		response.setContentType("text/html;charset=UTF-8");
+		String newTime=new SimpleDateFormat("yyyyMMdd").format(new Date());//当前年月日
+		String fileURL=request.getSession().getServletContext().getRealPath("xml/"+newTime+".xml");
+		createFile(fileURL);
+		/***************开始解析保存聊天内容的xml文件********************/
+		try {
+			SAXReader reader=new SAXReader();
+			Document feedDoc = reader.read(new File(fileURL));
+			Element root=feedDoc.getRootElement();
+			Element messagesNode=root.element("messages");
+			//获取所有<message>子结点
+			Iterator<Element> items=messagesNode.elementIterator("message");
+			String messages="";
+			//获取当前用户
+			HttpSession session=request.getSession();
+			String userName="";
+			if(session.getAttribute("username")==null) {
+				//保存标记信息，表示用户账户已经过期
+				request.setAttribute("messages", "error");
+			}else {
+				userName=session.getAttribute("username").toString();
+				SimpleDateFormat sdf=new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+				while(items.hasNext()) {
+					Element item=items.next();
+					String sendTime=item.elementText("sendTime");//获取发言时间					
+					if(sdf.parse(sendTime).after(sdf.parse(session.getAttribute("loginTime").toString()))
+							||sendTime.equals(session.getAttribute("loginTime").toString())) {//只获取登录后的聊天信息
+						String from=item.elementText("from");
+						String face=item.elementText("face");
+						String to=item.elementText("to");
+						String content=item.elementText("content");
+						boolean isPrivate=Boolean.valueOf(item.elementText("isPrivate"));
+						/***构造聊天内容字符串***/
+						if(isPrivate) {//私聊的内容
+							if(userName.equals(to)||userName.equals(from)) {
+								messages+="<font color='red'>[私人对话]</font><font color='blue'><b>"
+										+from+"</b></font><font color='#CC0000'>"+face+"</font>对"
+										+"<font color='green'>["+to+"]</font>说："+content+"&nbsp;"
+												+ "<font color='gray'>["+sendTime+"]</font><br>";
+							}
+						}else if((from.equals("[系统公告]"))) {//系统公告信息
+							messages+="[系统公告]："+content+"&nbsp;<font color='gray'>["+sendTime+"]</font><br>";
+						}else {//群聊的内容
+							messages+="<font color='blue'><b>"+from+"</b></font><font color='#CC0000'>"
+									+face+"</font>对<font color='green'>["+to+"]</font>说："+content
+									+"&nbsp;<font color='gray'>["+sendTime+"]</font><br>";
+						}
+					}
+				}
+				request.setAttribute("messages", messages);//保存从xml获取的聊天信息到request中
+			}
+			//将request转发到content.jsp
+			request.getRequestDispatcher("content.jsp").forward(request, response);
+		} catch (DocumentException | ServletException | IOException | ParseException e ) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
 	}
 }
