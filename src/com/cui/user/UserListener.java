@@ -2,6 +2,8 @@ package com.cui.user;
 
 import javax.servlet.http.HttpSessionBindingEvent;
 import javax.servlet.http.HttpSessionBindingListener;
+
+import com.cui.servlet.MessagesAction;
 /**
  * 用于监听上线和下线的用户。
  */
@@ -23,16 +25,19 @@ public class UserListener implements HttpSessionBindingListener {
 		this.user = user;
 	}
 	@Override
-	//当Session有对象加入（即有人登录）时执行的方法
+	//当Session有对象加入（即有人登录）时执行本方法，在控制台显示登录的用户名
 	public void valueBound(HttpSessionBindingEvent arg0) {
 		System.out.println("上线用户："+this.user);
 	}
 
 	@Override
-	//当Session有对象移除（即有人退出）时执行的方法
+	//当Session有对象移除（即有人退出）时执行本方法，在控制台显示退出的用户名，在已登录用户列表移除改用户名，并写入公告
 	public void valueUnbound(HttpSessionBindingEvent arg0) {
 		System.out.println("下线用户："+this.user);
-
+		//从登录用户列表中移除该用户
+		container.removeUser(this.user);
+		MessagesAction messageAction=new MessagesAction();
+		messageAction.writeInfo(this.user, arg0);
 	}
 
 }

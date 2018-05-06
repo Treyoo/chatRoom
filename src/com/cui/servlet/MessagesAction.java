@@ -17,6 +17,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
+import javax.servlet.http.HttpSessionBindingEvent;
 
 import org.dom4j.Document;
 import org.dom4j.DocumentException;
@@ -55,7 +56,7 @@ public class MessagesAction extends HttpServlet {
 		}else if(action.equals("loginRoom")) {//登录
 			this.loginRoom(request,response);
 		}else if(action.equals("exitRoom")) {//退出
-//			this.exitRoom();
+			this.exitRoom(request,response);
 		}
 	}
 
@@ -269,6 +270,64 @@ public class MessagesAction extends HttpServlet {
 			//将request转发到content.jsp
 			request.getRequestDispatcher("content.jsp").forward(request, response);
 		} catch (DocumentException | ServletException | IOException | ParseException e ) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	
+	/**
+	 * 退出聊天室，销毁当前session,并重定向到登录页面
+	 * @param request
+	 * @param response
+	 * @return void
+	 */
+	public void exitRoom(HttpServletRequest request, HttpServletResponse response) {
+		HttpSession session=request.getSession();
+		//销毁当前request的session
+		session.invalidate();
+		//重定向到登录页面
+		try {
+			request.getRequestDispatcher("index.jsp").forward(request, response);
+		} catch (ServletException | IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	
+	/**
+	 * 当用户下线时向xml文件中写入该用户离开的系统公告
+	 * @param user
+	 * @param arg0
+	 */
+	public void writeInfo(String user,HttpSessionBindingEvent arg0) {
+		/************************开始添加公告到xml文件*********************/
+		String newTime=new SimpleDateFormat("yyyyMMdd").format(new Date());//保存文件的年月日
+		String fileURL=arg0.getSession().getServletContext().getRealPath("xml/"+newTime+".xml");
+		createFile(fileURL);
+		try {
+			SAXReader reader=new SAXReader();
+			Document feedDoc=reader.read(new File(fileURL));
+			Element root=feedDoc.getRootElement();
+			Element messages=root.element("messages");
+			//添加一个<message>子结点
+			Element message=messages.addElement("message");
+			//将退出信息保存到<message>结点下对应的子结点里
+			message.addElement("from").setText("[系统公告]");
+			message.addElement("face").setText("");
+			message.addElement("to").setText("");
+			message.addElement("content").addCDATA("<font color='gray'>"+user+"离开了聊天室！</font>");
+			message.addElement("isPrivate").setText("false");
+			message.addElement("sendTime").setText(
+					new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date()));
+			//创建OutputFormat对象
+			OutputFormat format=OutputFormat.createPrettyPrint();//美化输出格式
+			//获取XML文件输出流
+			XMLWriter writer=new XMLWriter(new FileOutputStream(fileURL),format);
+			writer.write(feedDoc);//向流写入数据
+			writer.flush();
+			writer.close();
+			/**********************添加结束******************************/
+		} catch (DocumentException | IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}

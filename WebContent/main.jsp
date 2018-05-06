@@ -104,11 +104,14 @@ function set(selectPerson) {
 	var loader=new net.AjaxRequest("MessagesAction?action=sendMessage",
 			deal_send,onerror,"POST",param);
 }
+/**退出聊天室*/
+function Exit(){
+	window.location.href="MessagesAction?action=exitRoom";
+	alert("欢迎您下次光临！");
+}
 </script>
 </head>
 <body>
-你好！${username}。
-  这是聊天室主界面（临时）。<br>
 <!-- 顶部 -->
 <table width="778" height="152" border="0" align="center"
  cellpadding="0" cellspacing="0" background="images/top.jpg">
@@ -145,35 +148,35 @@ function set(selectPerson) {
          value="" size="35" readonly="readonly">
  			表情
  		<select name="face" class="wenbenkuang">
-		  <option  value="无表情的">无表情的</option>
+		  <option  value="无表情的">无表情地</option>
 		  <option value="微笑着" selected>微笑着</option>
-		  <option value="笑呵呵地">笑呵呵地</option>
-		  <option value="热情的">热情的</option>
-		  <option value="温柔的">温柔的</option>
+		  <option value="笑呵呵地">贱贱地</option>
+		  <option value="热情地">热情地</option>
+		  <option value="温柔地">温柔地</option>
 		  <option value="红着脸">红着脸</option>
-		  <option value="幸福的">幸福的</option>
+		  <option value="幸福地">滑稽地</option>
 		  <option value="嘟着嘴">嘟着嘴</option>
-		  <option value="热泪盈眶的">热泪盈眶的</option>
-		  <option value="依依不舍的">依依不舍的</option>
-		  <option value="得意的">得意的</option>
-		  <option value="神秘兮兮的">神秘兮兮的</option>
-		  <option value="恶狠狠的">恶狠狠的</option>
-		  <option value="大声的">大声的</option>
-		  <option value="生气的">生气的</option>
-		  <option value="幸灾乐祸的">幸灾乐祸的</option>
-		  <option value="同情的">同情的</option>
-		  <option value="遗憾的">遗憾的</option>
-		  <option value="正义凛然的">正义凛然的</option>
-		  <option value="严肃的">严肃的</option>
-		  <option value="慢条斯理的">慢条斯理的</option>
-		  <option value="无精打采的">无精打采的</option>
+		  <option value="热泪盈眶地">热泪盈眶地</option>
+		  <option value="依依不舍地">依依不舍地</option>
+		  <option value="得意地">得意地</option>
+		  <option value="神秘兮兮地">神秘兮兮地</option>
+		  <option value="恶狠狠地">恶狠狠地</option>
+		  <option value="大声地">大声地</option>
+		  <option value="生气地">生气地</option>
+		  <option value="幸灾乐祸地">幸灾乐祸地</option>
+		  <option value="同情地">同情地</option>
+		  <option value="遗憾地">遗憾地</option>
+		  <option value="正义凛然地">正义凛然地</option>
+		  <option value="严肃地">严肃地</option>
+		  <option value="慢条斯理地">慢条斯理地</option>
+		  <option value="无精打采地">无精打采地</option>
 		</select>
 		说：悄悄话<input name="isPrivate" type="checkbox" class="noborder"
 		id="isPrivate" value="true" onClick="checkIsPrivate()">
 		滚屏<input name="scrollScreen" type="checkbox" class="noborder"
 		id="scrollScreen" onClick="checkScrollScreen()" value="1" checked>
        </td>
-       <td width="120" align="right">&nbsp;&nbsp;字体颜色：
+       <td width="116" align="right">&nbsp;&nbsp;字体颜色：
          <select name="color" size="1" class="wenbenkuang" id="select">
 	        <option selected>默认颜色</option>
 	        <option style="color:#FF0000" value="FF0000">红色热情</option>
