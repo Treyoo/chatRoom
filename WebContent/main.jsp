@@ -30,8 +30,7 @@ function deal_content() {
 	var returnValue=this.req.responseText;//获取Ajax处理页的返回值
 	var h=returnValue.replace(/\s/g,"");////去除字符串中的Unicode空白符
 	if(h=="error"){
-		//Exit();
-		alert("执行了Exit()方法");
+		Exit();
 	}else{
 		content.innerHTML=sysBBS+returnValue+"</span>";
 	}
@@ -64,6 +63,7 @@ window.onload=function(){
 }
 window.setInterval("showOnline();",5000);//每5秒钟获取一次在线用户列表
 window.setInterval("showContent();",5000);//每5秒钟获取一次聊天内容
+  
 /**自动添加聊天对象*/
 function set(selectPerson) {
 	if(selectPerson!="<%=session.getAttribute("username")%>"){
@@ -112,6 +112,27 @@ function Exit(){
 </script>
 </head>
 <body>
+<script>
+window.addEventListener("beforeunload", function() {
+ /*   //获取事件鼠标的位置
+    var n = window.event.screenX - window.screenLeft; 
+    //获取浏览器界面可活动的窗口宽度（50是右上角关闭按钮的宽度）
+    var b = n > document.documentElement.scrollWidth-50; 
+    //window.event.clientY表示事件的y值（鼠标）
+    //window.event.altKey表示是否按下列alt键（alt+F4）
+    alert("screenX="+window.event.screenX+" screenLeft="+window.screenLeft);
+    alert("n="+n+" b="+b);
+    if(b && window.event.clientY < 0 || window.event.altKey) 
+    {
+        alert("关闭");
+        Exit();
+    }else{
+        alert("刷新");
+    }*/
+    /**上面想区分关闭和刷新，搞了很久没成功。先简单处理：刷新也算退出吧**/
+    Exit();
+});
+</script>
 <!-- 顶部 -->
 <table width="778" height="152" border="0" align="center"
  cellpadding="0" cellspacing="0" background="images/top.jpg">
