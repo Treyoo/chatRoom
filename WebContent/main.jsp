@@ -1,6 +1,6 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8"
     pageEncoding="UTF-8" import="java.sql.*"%>
-<%int maxTime=50*60*1000;//5分钟不说话自动退出聊天室 %>
+<%int maxTime=10*60*1000;//10分钟不说话自动退出聊天室 %>
 <!DOCTYPE html>
 <html>
 <head>
@@ -51,8 +51,8 @@ function deal_send(){
 			document.getElementById('content').scrollHeight*2;
 	}
 	//重新计时
-	//clearTimeout(timer);
-	//timer=window.setTimeout("Exit()",<%=maxTime%>);
+	clearTimeout(timer);
+	timer=window.setTimeout("Exit()",<%=maxTime%>);
 	form1.content1.value="";//清空编辑框
 	showContent();//显示聊天内容
 }
@@ -64,6 +64,8 @@ window.onload=function(){
 window.setInterval("showOnline();",5000);//每5秒钟获取一次在线用户列表
 window.setInterval("showContent();",5000);//每5秒钟获取一次聊天内容
   
+timer = window.setTimeout("Exit()",<%=maxTime%>);//用于当用户长时间不说话时，认为其退出了聊天室
+
 /**自动添加聊天对象*/
 function set(selectPerson) {
 	if(selectPerson!="<%=session.getAttribute("username")%>"){
